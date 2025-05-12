@@ -1,0 +1,61 @@
+[tool.poetry]
+name = "til-25-cv"
+version = "0.1.0"
+description = "template for python api server"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+packages = [{ include = "src" }]
+
+[tool.poetry.dependencies]
+python = "<3.13,>=3.10"
+python-dotenv = "^1.1.0"
+fastapi-slim = "^0.115.12"
+uvicorn = "^0.34.2"
+uvloop = "^0.21.0"
+httptools = "^0.6.4"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.11.7"
+poethepoet = "^0.34.0"
+rich = "^14.0.0"
+pycocotools = "^2.0.8"
+requests = "^2.32.3"
+tqdm = "^4.67.1"
+
+[tool.poetry.requires-plugins]
+poetry-plugin-export = ">=1.8"
+
+[tool.poetry.group.jupyter]
+optional = true
+
+[tool.poetry.group.jupyter.dependencies]
+ipykernel = "*"
+ipympl = "*"
+ipywidgets = "*"
+
+[tool.poe.tasks]
+dev = { cmd = "python dev.py", use_exec = true }
+prod = "docker run --rm --gpus all -p 5002:5002 til-25-cv:latest"
+test = "python test.py"
+publish = "./submit.sh"
+requirements = "poetry export -o requirements.txt --without-hashes"
+
+[tool.poe.tasks.build]
+cmd = """docker build -f Dockerfile . \
+  -t til-25-cv:latest \
+  -t til-25-cv:${tag} \
+  -t asia-southeast1-docker.pkg.dev/til-ai-2025/h3althydr0plet-repo-til-25/h3althydr0plet-cv:latest \
+  -t asia-southeast1-docker.pkg.dev/til-ai-2025/h3althydr0plet-repo-til-25/h3althydr0plet-cv:${tag} \
+"""
+deps = ["requirements"]
+args = [{ name = "tag", positional = true, required = true }]
+
+[tool.ruff.lint]
+select = ["D"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
