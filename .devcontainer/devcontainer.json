@@ -59,6 +59,6 @@
   // "shutdownAction": "none",
 
   // See: https://containers.dev/implementors/json_reference/#lifecycle-scripts
-  "postCreateCommand": ".devcontainer/hooks/postCreate.sh",
+  //"postCreateCommand": "/workspaces/til-25-cv/.devcontainer/hooks/postCreate.sh",
   "postStartCommand": ".devcontainer/hooks/postStart.sh"
 }
