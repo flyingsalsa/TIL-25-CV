@@ -39,7 +39,7 @@ def sample_generator(
         data_dir: Path,
 ) -> Iterator[Mapping[str, Any]]:
     for instance in instances:
-        with open(data_dir / "images" / instance["file_name"], "rb") as img_file:
+        with open(data_dir / "images" / "train" / instance["file_name"], "rb") as img_file:
             img_data = img_file.read()
             yield {
                 "key": instance["id"],
@@ -61,7 +61,7 @@ def score_cv(preds: Sequence[Mapping[str, Any]], ground_truth: Any) -> float:
 
 
 def main():
-    data_dir = Path(f"data/cv")
+    data_dir = Path(f"data/")
     results_dir = Path(f"results")
     results_dir.mkdir(parents=True, exist_ok=True)
 
