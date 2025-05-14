@@ -39,7 +39,7 @@ class CVManager:
         try:
             # 1. Load image bytes into a PIL Image object
             # The input image is already in bytes, so we can use io.BytesIO
-            pil_image = Image.open(io.BytesIO(image_bytes))
+            pil_image = Image.open(io.BytesIO(image))
 
             # 2. Perform inference
             # results is a list of Results objects. For a single image, we take results[0].
