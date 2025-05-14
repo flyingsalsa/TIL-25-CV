@@ -19,12 +19,13 @@ RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
   pip install -U pip
 
 WORKDIR /app
-
+RUN apt-get update && apt-get install ffmpeg libsm6 libxext6  -y
 # Remember to regenerate requirements.txt!
 COPY --link requirements.txt ./
 RUN --mount=type=cache,target=/root/.cache/pip,sharing=locked \
   pip install -r requirements.txt
-
+RUN apt-get update && apt-get install -y python3-opencv
+RUN pip install opencv-python
 # Copy files as needed in order of largest/least changed to smallest/most changed.
 COPY --link models ./models
 COPY --link src ./src
