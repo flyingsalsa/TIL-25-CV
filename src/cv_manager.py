@@ -1,5 +1,6 @@
 
 from typing import Any
+import torch
 from ultralytics import YOLO
 import io
 from typing import Any, List # Updated List to be List for modern Python type hinting
@@ -10,16 +11,20 @@ from sahi import AutoDetectionModel
 class CVManager:
     """Manages the CV model."""
   
-        """Initialize CV Manager.
+    """Initialize CV Manager.
 
-        This is where you can initialize your model and any static configurations.
-        """
-        try:
-            self.model = YOLO('models/best.pt')
-            print("YOLO model loaded successfully from models/best.pt")
-        except Exception as e:
-            print(f"Error loading YOLO model: {e}")
-            self.model = None 
+    This is where you can initialize your model and any static configurations.
+    """
+    try:
+        self.detection_model = AutoDetectionModel.from_pretrained(
+            model_type="ultralytics",
+            model_path='models/best.pt',
+            confidence_threshold=0.3,
+            device= 'cuda' if torch.cuda.is_available() else 'cpu'
+        )
+    except Exception as e:
+        print(f"Error loading YOLO model: {e}")
+        self.model = None 
 
     def cv(self, image: bytes) -> list[dict[str, Any]]:
         """Performs object detection on an image.
