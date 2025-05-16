@@ -6,25 +6,24 @@ import io
 from typing import Any, List # Updated List to be List for modern Python type hinting
 from PIL import Image
 from sahi import AutoDetectionModel
+from sahi.predict import get_sliced_prediction
 
 
 class CVManager:
     """Manages the CV model."""
-  
-    """Initialize CV Manager.
-
-    This is where you can initialize your model and any static configurations.
-    """
-    try:
-        self.detection_model = AutoDetectionModel.from_pretrained(
-            model_type="ultralytics",
-            model_path='models/best.pt',
-            confidence_threshold=0.3,
-            device= 'cuda' if torch.cuda.is_available() else 'cpu'
-        )
-    except Exception as e:
-        print(f"Error loading YOLO model: {e}")
-        self.model = None 
+    
+    def __init__(self):
+        """Initialize CV Manager."""
+        try:
+            self.model = AutoDetectionModel.from_pretrained(
+                model_type="ultralytics",
+                model_path='models/best.pt',
+                confidence_threshold=0.3,
+                device= 'cuda' if torch.cuda.is_available() else 'cpu'
+            )
+        except Exception as e:
+            print(f"Error loading YOLO model: {e}")
+            self.model = None 
 
     def cv(self, image: bytes) -> list[dict[str, Any]]:
         """Performs object detection on an image.
@@ -45,46 +44,32 @@ class CVManager:
             # 1. Load image bytes into a PIL Image object
             # The input image is already in bytes, so we can use io.BytesIO
             pil_image = Image.open(io.BytesIO(image))
+            
+            
+            result = get_sliced_prediction(
+                pil_image,
+                self.model,
+                slice_height=512,  # Adjust as needed
+                slice_width=512,
+                overlap_height_ratio=0.2,
+                overlap_width_ratio=0.2
+            )
+            
+            # Process each prediction
+            for obj in result.object_prediction_list:
+                bbox = obj.bbox.to_xywh()
+                category_id = obj.category.id
 
-            # 2. Perform inference
-            # results is a list of Results objects. For a single image, we take results[0].
-            # verbose=False to prevent YOLO from printing to console during inference.
-            results = self.model(pil_image, verbose=False)
+                # Ensure bbox coordinates are integers
+                formatted_bbox = [int(coord) for coord in bbox]
 
-            if results and len(results) > 0:
-                # Access the detections for the first (and only) image
-                detections = results[0]
+                predictions_for_image.append({
+                    "bbox": formatted_bbox,
+                    "category_id": category_id
+                })
 
-                # Iterate over each detected bounding box
-                for box in detections.boxes:
-                    # box.xywh provides [x_center, y_center, width, height] as a tensor
-                    # We need to convert it to [x_top_left, y_top_left, width, height]
-                    xywh_center = box.xywh[0].tolist() # Get the first (and only) box's data as a list
-                    
-                    xc, yc, w, h = xywh_center
-                    
-                    # Calculate top-left x and y
-                    x = xc - (w / 2)
-                    y = yc - (h / 2)
-                    
-                    # Ensure bbox coordinates are integers as often expected
-                    formatted_bbox = [int(x), int(y), int(w), int(h)]
-                    
-                    # Get the class ID
-                    category_id = int(box.cls[0].item()) # .cls is a tensor, .item() gets the Python number
-
-                    predictions_for_image.append({
-                        "bbox": formatted_bbox,
-                        "category_id": category_id
-                    })
-            # If no objects are detected, predictions_for_image will remain empty,
-            # which is the correct behavior as per the problem statement.
-
-        except FileNotFoundError:
-      
-            print(f"Error: Could not identify image from bytes.")
         except Exception as e:
-            # Catch any other errors during image processing or inference
-            print(f"An error occurred during CV processing: {e}")
+            print(f"Error during SAHI inference: {e}")
 
         return predictions_for_image
+         

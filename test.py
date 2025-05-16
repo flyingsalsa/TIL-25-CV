@@ -39,7 +39,7 @@ def sample_generator(
         data_dir: Path,
 ) -> Iterator[Mapping[str, Any]]:
     for instance in instances:
-        with open(data_dir / "images" / "train" / instance["file_name"], "rb") as img_file:
+        with open(data_dir / "images" / "meme" / instance["file_name"], "rb") as img_file:
             img_data = img_file.read()
             yield {
                 "key": instance["id"],
