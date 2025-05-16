@@ -4,12 +4,12 @@ from ultralytics import YOLO
 import io
 from typing import Any, List # Updated List to be List for modern Python type hinting
 from PIL import Image
+from sahi import AutoDetectionModel
 
 
 class CVManager:
     """Manages the CV model."""
-
-    def __init__(self):
+  
         """Initialize CV Manager.
 
         This is where you can initialize your model and any static configurations.
@@ -76,15 +76,10 @@ class CVManager:
             # which is the correct behavior as per the problem statement.
 
         except FileNotFoundError:
-            # This specific exception might occur if Image.open fails due to an issue
-            # that looks like a file not found (though it's from bytes).
-            # More general PIL.UnidentifiedImageError is also possible for corrupt images.
+      
             print(f"Error: Could not identify image from bytes.")
         except Exception as e:
             # Catch any other errors during image processing or inference
             print(f"An error occurred during CV processing: {e}")
-            # Depending on requirements, you might log this and return an empty list,
-            # or re-raise a specific error type. For now, returning empty.
-            # To help debug, you could: import traceback; traceback.print_exc()
 
         return predictions_for_image
